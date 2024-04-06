@@ -17,9 +17,12 @@ const customerSchema = new Schema({
     description: {
         type: String,
     },
-    // userId: [{
-    //     type: String,
-    // }]
+    userId: {
+        type: String,
+    },
+    isLocked:{
+        type: Boolean
+    }
 
 
 })

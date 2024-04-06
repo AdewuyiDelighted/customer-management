@@ -17,9 +17,9 @@ const userSchema = new Schema({
     occupation: {
         type: String
     },
-    customers: [
-        {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
-    ]
+    // customers: [
+    //     {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
+    // ]
 })
 
 const User = mongoose.model("User", userSchema)

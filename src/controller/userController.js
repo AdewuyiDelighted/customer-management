@@ -16,7 +16,15 @@ const addCustomer = async (request, response) =>{
         response.status(500).json(error.message)
     }
 };
+const updateCustomer = async (request, response) =>{
+    try{
+        const res = await userService.update(request.body);
+        response.status(200).json({res})
+    }catch (error){
+        response.status(500).json(error.message)
+    }
+};
 
 
 
-module.exports = {register,addCustomer}
+module.exports = {register,addCustomer,updateCustomer}

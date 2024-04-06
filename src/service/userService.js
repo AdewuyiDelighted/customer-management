@@ -16,6 +16,7 @@ const createUser = async (request) => {
         email: email,
         password: password,
         occupation: occupation,
+        isLocked: true
 
     };
 
@@ -34,19 +35,20 @@ const createUser = async (request) => {
         message: "Registration Successfully"
     }
 }
+
+
 const addCustomer = async (addCustomerRequest) => {
     const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription} = addCustomerRequest
-    email = addCustomerRequest.valueOf().userEmail
-
+    let email = addCustomerRequest.valueOf().userEmail
+    console.log("add customer request", addCustomerRequest.valueOf().data)
     const user = await User.findOne({email: email})
     if (user === null) {
         throw new UserNotFoundException("User Not found")
     }
-    email = addCustomerRequest.valueOf().customerEmail
 
     const customer = await Customer.findOne({name: user.valueOf().email + customerName})
 
-    if(customer !== null){
+    if (customer !== null) {
         throw new CustomerAlreadyExistException("Customer already exist (You can update Customer description if necessary)");
     }
 
@@ -58,15 +60,10 @@ const addCustomer = async (addCustomerRequest) => {
     }
 
     const savedCustomer = await Customer.create(newCustomer)
-    savedCustomer.valueOf().userId.push(user.valueOf()._id)
+    savedCustomer.valueOf().userId = user.valueOf()._id
     await savedCustomer.save()
 
     await user.save()
-
-    // let customerList = []
-    // customerList = await Customer.find({userId: user.valueOf()._id})
-    // console.log("customers",customerList)
-
 
     return {
         message: "New customer add successfully"
@@ -74,4 +71,54 @@ const addCustomer = async (addCustomerRequest) => {
     }
 }
 
-module.exports = {createUser, addCustomer}
+const update = async (updateCustomerRequest) => {
+    const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription} = updateCustomerRequest
+
+}
+const getCustomer = async (findCustomerRequest) => {
+    const {userEmail, customerName} = findCustomerRequest
+
+    const user = findUser(userEmail)
+
+    const customer = Customer.findOne(user.valueOf().email + customerName)
+    if (customer === null) {
+        throw new CustomerAlreadyExistException("Customer not found");
+    }
+    return customer;
+
+
+}
+
+const getAllCustomers = async (userEmail) => {
+    const user = findUser(userEmail)
+    let customerList = []
+    customerList = await Customer.find({userId: user.valueOf()._id})
+    return customerList
+
+
+}
+
+const deleteCustomer = (deleteCustomerRequest) => {
+    const {userName, customerName} = deleteCustomerRequest
+    const customer = getCustomer(deleteCustomerRequest)
+    Customer.deleteOne(customer)
+    return "DONE"
+}
+
+const deleteAllCustomers = (userEmail) => {
+    const allCustomers = getAllCustomers(userEmail)
+    Customer.deleteMany(allCustomers)
+    return "DONE"
+
+}
+
+const findUser = (email) => {
+    const user = User.findOne({email: email})
+    if (user === null) {
+        throw new UserNotFoundException("User doesnt exist")
+    }
+    return user
+
+}
+
+module.exports = {createUser, addCustomer, update}
