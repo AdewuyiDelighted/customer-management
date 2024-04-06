@@ -6,6 +6,9 @@ const ConnectDB = require('./src/db/connectDB')
 const port = 3001
 const router = require('./src/router/router')
 const notFound = require('./src/middleware/NotFound')
+const Customer = require("./src/model/Customer");
+const User = require("./src/model/User");
+
 ConnectDB(dburl)
 
 app.use(express.json())

@@ -4,22 +4,23 @@ const Schema = mongoose.Schema
 
 
 const userSchema = new Schema({
-    fullName:{
-        type:String
+    fullName: {
+        type: String
     },
-    email:{
-        type:String
+    email: {
+        type: String,
+        unique:true
     },
-    password:{
-        type:String
+    password: {
+        type: String
     },
-    occupation:{
-       type:String
+    occupation: {
+        type: String
     },
-    customers:[
-        {type:mongoose.Schema.Types.ObjectId,ref:'Customer'}
+    customers: [
+        {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
     ]
 })
 
-const User = mongoose.model("User",userSchema)
-module.exports= User
+const User = mongoose.model("User", userSchema)
+module.exports = User

@@ -15,15 +15,14 @@ const customerSchema = new Schema({
         type: String,
     },
     description: {
-        type: String
+        type: String,
     },
-    userId:{
-        type:String,
-
-    }
+    // userId: [{
+    //     type: String,
+    // }]
 
 
 })
 
-const Customer = mongoose.model("Customer",customerSchema)
+const Customer = mongoose.model("Customer", customerSchema)
 module.exports = Customer;
