@@ -20,9 +20,6 @@ const customerSchema = new Schema({
     userId: {
         type: String,
     },
-    isLocked:{
-        type: Boolean
-    }
 
 
 })

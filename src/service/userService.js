@@ -78,42 +78,55 @@ const update = async (updateCustomerRequest) => {
 const getCustomer = async (findCustomerRequest) => {
     const {userEmail, customerName} = findCustomerRequest
 
-    const user = findUser(userEmail)
+    const user = await findUser(userEmail)
 
-    const customer = Customer.findOne(user.valueOf().email + customerName)
+    const customer = await Customer.findOne({name: user.valueOf().email + customerName})
+
     if (customer === null) {
         throw new CustomerAlreadyExistException("Customer not found");
     }
-    return customer;
+    return {
+        name: customer.valueOf().name.slice(user.valueOf().email.length),
+        email: customer.valueOf().email,
+        phoneNumber: customer.valueOf().phoneNumber,
+        description: customer.valueOf().description,
+    };
 
 
 }
 
-const getAllCustomers = async (userEmail) => {
-    const user = findUser(userEmail)
-    let customerList = []
-    customerList = await Customer.find({userId: user.valueOf()._id})
-    return customerList
+const getAllCustomers = async (getAllCustomersRequest) => {
+    const {userEmail} = getAllCustomersRequest
+    const user = await findUser(userEmail)
 
-
+    let customers = []
+    let slicedNames = []
+    customers = await Customer.find({userId: user.valueOf()._id})
+    slicedNames = await customers.map(customer => customer.name.slice(user.email.length))
+    for (let customer in customers) {
+        customers[customer].name = slicedNames[customer]
+        delete customers[customer].userId;
+    }
+    return customers
 }
 
-const deleteCustomer = (deleteCustomerRequest) => {
+const deleteCustomer = async (deleteCustomerRequest) => {
     const {userName, customerName} = deleteCustomerRequest
-    const customer = getCustomer(deleteCustomerRequest)
+    const customer = await getCustomer(deleteCustomerRequest)
     Customer.deleteOne(customer)
     return "DONE"
 }
 
-const deleteAllCustomers = (userEmail) => {
-    const allCustomers = getAllCustomers(userEmail)
+const deleteAllCustomers = async (userEmail) => {
+    const allCustomers = await getAllCustomers(userEmail)
     Customer.deleteMany(allCustomers)
     return "DONE"
 
 }
 
-const findUser = (email) => {
-    const user = User.findOne({email: email})
+
+const findUser = async (email) => {
+    const user = await User.findOne({email: email})
     if (user === null) {
         throw new UserNotFoundException("User doesnt exist")
     }
@@ -121,4 +134,4 @@ const findUser = (email) => {
 
 }
 
-module.exports = {createUser, addCustomer, update}
+module.exports = {createUser, addCustomer, update, getCustomer, getAllCustomers, deleteCustomer, deleteAllCustomers}

@@ -17,6 +17,13 @@ const userSchema = new Schema({
     occupation: {
         type: String
     },
+    businessName:{
+        type:String,
+    },
+    isLocked:{
+        type: Boolean
+    }
+
     // customers: [
     //     {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
     // ]

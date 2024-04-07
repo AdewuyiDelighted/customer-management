@@ -1,30 +1,69 @@
 const userService = require('../service/userService')
 
-const register = async (request, response) =>{
-    try{
+const register = async (request, response) => {
+    try {
         const res = await userService.createUser(request.body);
         response.status(200).json({res})
-    }catch (error){
+    } catch (error) {
         response.status(500).json(error.message)
     }
 };
-const addCustomer = async (request, response) =>{
-    try{
+const addCustomer = async (request, response) => {
+    try {
         const res = await userService.addCustomer(request.body);
         response.status(200).json({res})
-    }catch (error){
+    } catch (error) {
         response.status(500).json(error.message)
     }
 };
-const updateCustomer = async (request, response) =>{
-    try{
+const updateCustomer = async (request, response) => {
+    try {
         const res = await userService.update(request.body);
         response.status(200).json({res})
-    }catch (error){
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
+const getACustomer = async (request, response) => {
+    try {
+        const res = await userService.getCustomer(request.body);
+        response.status(200).json({res})
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
+const getAllCustomers = async (request, response) => {
+    try {
+        const res = await userService.getAllCustomers(request.body);
+        response.status(200).json({res})
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
+const removeACustomer = async (request, response) => {
+    try {
+        const res = userService.deleteCustomer(request.body);
+        response.status(200).json({res})
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
+const removeAllCustomers = async (request, response) => {
+    try {
+        const res = userService.deleteAllCustomers(request.body);
+        response.status(200).json({res})
+    } catch (error) {
         response.status(500).json(error.message)
     }
 };
 
 
-
-module.exports = {register,addCustomer,updateCustomer}
+module.exports = {
+    register,
+    addCustomer,
+    updateCustomer,
+    getACustomer,
+    getAllCustomers,
+    removeACustomer,
+    removeAllCustomers
+}
