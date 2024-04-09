@@ -3,6 +3,7 @@ const UserAlreadyExistException = require('../exception/UserAlreadyExistExceptio
 const UserNotFoundException = require('../exception/UserNotFoundException')
 const Customer = require("../model/Customer");
 const CustomerAlreadyExistException = require("../exception/CustomerAlreadyExistException");
+const NoCustomerException = require("../exception/NoCustomerException");
 
 
 const createUser = async (request) => {
@@ -38,9 +39,13 @@ const createUser = async (request) => {
 
 
 const addCustomer = async (addCustomerRequest) => {
-    const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription} = addCustomerRequest
+    const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription,deadlineYear,deadlineMonth,deadlineDay} = addCustomerRequest
+
+    const date = await setDeadLine(deadlineYear,deadlineMonth,deadlineDay)
+
+
     let email = addCustomerRequest.valueOf().userEmail
-    console.log("add customer request", addCustomerRequest.valueOf().data)
+
     const user = await User.findOne({email: email})
     if (user === null) {
         throw new UserNotFoundException("User Not found")
@@ -57,6 +62,7 @@ const addCustomer = async (addCustomerRequest) => {
         email: customerEmail,
         phoneNumber: customerPhoneNumber,
         description: customerDescription,
+        defaultDeadline:date,
     }
 
     const savedCustomer = await Customer.create(newCustomer)
@@ -85,6 +91,7 @@ const getCustomer = async (findCustomerRequest) => {
     if (customer === null) {
         throw new CustomerAlreadyExistException("Customer not found");
     }
+
     return {
         name: customer.valueOf().name.slice(user.valueOf().email.length),
         email: customer.valueOf().email,
@@ -99,39 +106,79 @@ const getAllCustomers = async (getAllCustomersRequest) => {
     const {userEmail} = getAllCustomersRequest
     const user = await findUser(userEmail)
 
-    let customers = []
+    let customers = await Customer.find({userId: user.valueOf()._id})
+
+    if (customers.length === 0) {
+        throw new NoCustomerException("No Customer Available");
+    }
+
     let slicedNames = []
-    customers = await Customer.find({userId: user.valueOf()._id})
-    slicedNames = await customers.map(customer => customer.name.slice(user.email.length))
+
+    slicedNames = customers.map(customer => customer.name.slice(user.email.length))
+
     for (let customer in customers) {
         customers[customer].name = slicedNames[customer]
         delete customers[customer].userId;
     }
     return customers
+
 }
 
 const deleteCustomer = async (deleteCustomerRequest) => {
-    const {userName, customerName} = deleteCustomerRequest
+
+    const {userEmail, customerName} = deleteCustomerRequest
+
+    const user = await findUser(userEmail)
+
     const customer = await getCustomer(deleteCustomerRequest)
-    Customer.deleteOne(customer)
-    return "DONE"
+
+    await Customer.deleteOne({name: user.valueOf().email + customer.valueOf().name});
+
+    return {
+        message: "DONE"
+    }
 }
 
-const deleteAllCustomers = async (userEmail) => {
-    const allCustomers = await getAllCustomers(userEmail)
-    Customer.deleteMany(allCustomers)
-    return "DONE"
+
+const deleteAllCustomers = async (deleteAllCustomersRequest) => {
+
+    const {userEmail} = deleteAllCustomersRequest
+
+    const user = await findUser(userEmail)
+
+    let userId = user.valueOf()._id
+
+    await Customer.deleteMany({userId: userId});
+
+    return {
+        message: "DONE"
+    }
 
 }
 
 
 const findUser = async (email) => {
+
     const user = await User.findOne({email: email})
+
     if (user === null) {
         throw new UserNotFoundException("User doesnt exist")
     }
     return user
 
 }
+
+const setDeadLine = async (deadlineYear,deadlineMonth,deadlineDay) =>{
+    const date = new Date()
+    return date.setFullYear(deadlineYear,deadlineMonth -1,deadlineDay)
+
+}
+
+const updateUserInfo = async (userUpdateRequest) => {
+
+
+
+}
+
 
 module.exports = {createUser, addCustomer, update, getCustomer, getAllCustomers, deleteCustomer, deleteAllCustomers}

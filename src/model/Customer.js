@@ -17,6 +17,9 @@ const customerSchema = new Schema({
     description: {
         type: String,
     },
+    defaultDeadline: {
+        type: Date
+    },
     userId: {
         type: String,
     },
@@ -26,3 +29,4 @@ const customerSchema = new Schema({
 
 const Customer = mongoose.model("Customer", customerSchema)
 module.exports = Customer;
+
