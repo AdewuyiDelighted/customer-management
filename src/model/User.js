@@ -22,11 +22,11 @@ const userSchema = new Schema({
     },
     isLocked:{
         type: Boolean
+    },
+    defaultDeadlineReminder: {
+        type:String
     }
 
-    // customers: [
-    //     {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
-    // ]
 })
 
 const User = mongoose.model("User", userSchema)
