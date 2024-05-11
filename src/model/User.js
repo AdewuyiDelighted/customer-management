@@ -23,7 +23,7 @@ const userSchema = new Schema({
     isLocked:{
         type: Boolean
     },
-    defaultDeadlineReminder: {
+    numberOfDaysToReminder: {
         type:String
     }
 

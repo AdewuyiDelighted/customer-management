@@ -7,6 +7,7 @@ const Customer = require("../model/Customer");
 const CustomerAlreadyExistException = require("../exception/CustomerAlreadyExistException");
 const NoCustomerException = require("../exception/NoCustomerException");
 const InvalidDateException = require("../exception/InvalidDateException")
+const reminderUser = require("./emailService");
 
 
 const createUser = async (request) => {
@@ -44,32 +45,14 @@ const createUser = async (request) => {
 
 const addCustomer = async (addCustomerRequest) => {
     const {
-        userEmail,
-        customerName,
-        customerEmail,
-        customerPhoneNumber,
-        customerDescription,
-        deadlineYear,
-        deadlineMonth,
-        deadlineDay,
-        deadlineHour,
-        deadlineMinute,
-        deadlineSeconds
-    } = addCustomerRequest;
-
-    const date = await setDeadLine(deadlineYear, deadlineMonth, deadlineDay, deadlineHour, deadlineMinute, deadlineSeconds);
-
-
-    let email = addCustomerRequest.valueOf().userEmail;
-
+        userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription, deadlineYear, deadlineMonth, deadlineDay, deadlineHour, deadlineMinute, deadlineSeconds} = addCustomerRequest;
+    const date = await setDeadLine(deadlineYear, deadlineMonth, deadlineDay);
+        let email = addCustomerRequest.valueOf().userEmail;
     const user = await User.findOne({email: email});
     if (user === null) {
         throw new UserNotFoundException("User Not found");
     }
-    ;
-
     const customer = await Customer.findOne({name: user.valueOf().email + customerName});
-
     if (customer !== null) {
         throw new CustomerAlreadyExistException("Customer already exist (You can update Customer description if necessary)");
     }
@@ -81,18 +64,24 @@ const addCustomer = async (addCustomerRequest) => {
         description: customerDescription,
         defaultDeadline: date,
     };
+    console.log("i got here to return")
+
 
     const savedCustomer = await Customer.create(newCustomer);
+    console.log("i got here to create")
+
     savedCustomer.valueOf().userId = user.valueOf()._id;
     await savedCustomer.save();
 
     await user.save();
+    console.log("i got here to return return")
 
     return {
         message: "New customer add successfully"
 
     };
 };
+
 
 const update = async (updateCustomerRequest) => {
     const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription} = updateCustomerRequest
@@ -184,12 +173,11 @@ const findUser = async (email) => {
     return user
 
 };
-
-const setDeadLine = async (deadlineYear, deadlineMonth, deadlineDay, deadlineHour, deadlineMinute, deadlineSeconds) => {
+const setDeadLine = async (deadlineYear, deadlineMonth, deadlineDay) => {
     const date = new Date()
     date.setFullYear(deadlineYear, deadlineMonth - 1, deadlineDay)
-    date.setHours(deadlineHour, deadlineMinute, deadlineSeconds)
     if (moment(date).isBefore(Date.now())) throw new InvalidDateException("Inputted Date is Invalid")
+    console.log(setReminderDate(date,1))
     return date
 };
 
@@ -199,22 +187,45 @@ const setReminderDate = async (deadlineDate, userDefaultDeadlineReminder) => {
     return currentDate
 };
 
-const dailyReminderChecker = schedule.scheduleJob('0 15 * * *', (userEmail) => {
+const dailyReminderChecker = schedule.scheduleJob('0 0 * * *', async () => {
     const currentDate = new Date();
-    const user = findUser(userEmail)
-    for (let customer in getAllCustomers(userEmail)) {
-        if (customer.valueOf().defaultDeadline === currentDate) {
-
+    let customers = []
+    let todayDeadLine = []
+    let currentRunningUserEmail = "";
+    for await (let user of User.find()) {
+        customers = getAllCustomers(user.email)
+        currentRunningUserEmail = user.email;
+        for await (let customer of customers) {
+            if (await customerDeadline(customer,user.defaultDeadlineReminder))
+            todayDeadLine.push(customer)
         }
+        await reminderUser(currentRunningUserEmail,todayDeadLine)
     }
-    console.log('Task executed daily at 3 PM:', new Date().toLocaleTimeString());
 });
+
+const customerDeadline = async (customer, userDefaultDeadlineReminder) => {
+    const todayDate = new Date();
+    let daysToDeadLine = new Date();
+    daysToDeadLine = setReminderDate(customer.valueOf().defaultDeadline, userDefaultDeadlineReminder)
+    return daysToDeadLine === todayDate;
+
+}
 
 
 const updateUserInfo = async (userUpdateRequest) => {
 
 
 }
+// setReminderDate("2024-05-15",1)
 
 
-module.exports = {createUser, addCustomer, update, getCustomer, getAllCustomers, deleteCustomer, deleteAllCustomers}
+module.exports = {
+    createUser,
+    addCustomer,
+    update,
+    getCustomer,
+    getAllCustomers,
+    deleteCustomer,
+    deleteAllCustomers,
+    setReminderDate
+}

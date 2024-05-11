@@ -57,6 +57,16 @@ const removeAllCustomers = async (request, response) => {
     }
 };
 
+const setReminder = async (request, response) => {
+    try {
+        const res = await userService.setReminderDate(request.body);
+        response.status(200).json({res})
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
+
+
 
 module.exports = {
     register,
@@ -65,5 +75,6 @@ module.exports = {
     getACustomer,
     getAllCustomers,
     removeACustomer,
-    removeAllCustomers
+    removeAllCustomers,
+    setReminder,
 }
