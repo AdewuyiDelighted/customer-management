@@ -1,24 +1,24 @@
 const nodeMailer = require('nodemailer')
 
 
-async function reminderUser(userEmail, message) {
+async function reminderUser(userEmail, customers) {
 
 
     let transporter = nodeMailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env["myEmail "],
-            pass: process.env["myPassword "]
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD
         }
     });
 
 
     let mailOptions = {
-        from: 'youremail@gmail.com',
+        from: process.env["myEmail "],
         to: userEmail,
         subject: 'REMINDER: Deadline for customers works ',
         text: "Just a quick reminder about the upcoming deadline for your customers below" +
-            message +
+            customers +
             " Please review and take any necessary actions before the specified date."
 
     };
@@ -29,7 +29,7 @@ async function reminderUser(userEmail, message) {
         console.log('Email sent: ' + info);
         return true;
     } catch (error) {
-        console.err(error.message)
+        console.error(error.message)
         return false;
     }
 }

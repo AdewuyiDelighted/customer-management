@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const Customer = require("./Customer");
+const validator = require('validator');
+
 const Schema = mongoose.Schema
 
 
@@ -9,7 +11,11 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        unique:true
+        unique: true,
+        validate: {
+            validator:validateEmail,message:"Invalid Email"
+        },
+
     },
     password: {
         type: String
@@ -17,17 +23,22 @@ const userSchema = new Schema({
     occupation: {
         type: String
     },
-    businessName:{
-        type:String,
+    businessName: {
+        type: String,
     },
-    isLocked:{
+    isLocked: {
         type: Boolean
     },
-    numberOfDaysToReminder: {
-        type:String
+    numberOfDaysToDeadline: {
+        type: String
     }
 
 })
+
+function validateEmail(email){
+    const validEmailRegex = /[a-zA-Z0-9_+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}/;
+    return validEmailRegex.test(email)
+}
 
 const User = mongoose.model("User", userSchema)
 module.exports = User

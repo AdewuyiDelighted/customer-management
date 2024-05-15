@@ -65,6 +65,14 @@ const setReminder = async (request, response) => {
         response.status(500).json(error.message)
     }
 };
+const deleteAccount = async (request, response) => {
+    try {
+        const res = await userService.deleteAccount(request.body);
+        response.status(200).json({res})
+    } catch (error) {
+        response.status(500).json(error.message)
+    }
+};
 
 
 
@@ -73,6 +81,7 @@ module.exports = {
     addCustomer,
     updateCustomer,
     getACustomer,
+    deleteAccount,
     getAllCustomers,
     removeACustomer,
     removeAllCustomers,

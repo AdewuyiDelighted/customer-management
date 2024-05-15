@@ -4,6 +4,7 @@ const {register, getACustomer, removeACustomer, removeAllCustomers, setReminder}
 const {addCustomer} = require('../controller/userController')
 const {updateCustomer} = require('../controller/userController')
 const {getAllCustomers} = require("../controller/userController");
+const {deleteAccount} = require("../controller/userController");
 
 router.route('/register').post(register)
 router.route('/addCustomer').post(addCustomer)
@@ -13,5 +14,6 @@ router.route('/getAllCustomers').get(getAllCustomers)
 router.route('/removeACustomer').post(removeACustomer)
 router.route('/removeAllCustomers').post(removeAllCustomers)
 router.route('/setReminderDate').get(setReminder)
+router.route('/deleteAccount').post(deleteAccount)
 
 module.exports = router;

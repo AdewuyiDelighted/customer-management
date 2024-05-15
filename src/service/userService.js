@@ -16,24 +16,11 @@ const createUser = async (request) => {
     if (user) {
         throw new UserAlreadyExistException("User already exist");
     }
-    const newUser = {
-        fullName: fullName,
-        email: email,
-        password: password,
-        occupation: occupation,
-        defaultReminder: defaultReminder,
-        isLocked: true
-
+    const newUser = {fullName: fullName, email: email, password: password, occupation: occupation, defaultReminder: defaultReminder, isLocked: true
     };
-
     const savedUser = await User.create(newUser);
-
     const response = {
-        _id: savedUser._id,
-        fullName: savedUser.valueOf().fullName,
-        email: savedUser.valueOf().email,
-        password: savedUser.valueOf().password,
-        occupation: savedUser.valueOf().occupation
+        _id: savedUser._id, fullName: savedUser.valueOf().fullName, email: savedUser.valueOf().email, password: savedUser.valueOf().password, occupation: savedUser.valueOf().occupation
 
     };
     return {
@@ -45,9 +32,10 @@ const createUser = async (request) => {
 
 const addCustomer = async (addCustomerRequest) => {
     const {
-        userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription, deadlineYear, deadlineMonth, deadlineDay, deadlineHour, deadlineMinute, deadlineSeconds} = addCustomerRequest;
-    const date = await setDeadLine(deadlineYear, deadlineMonth, deadlineDay);
-        let email = addCustomerRequest.valueOf().userEmail;
+        userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription, deadlineYear, deadlineMonth, deadlineDay,
+    } = addCustomerRequest;
+    const date = await setDeadLineDate(deadlineYear, deadlineMonth, deadlineDay);
+    let email = addCustomerRequest.valueOf().userEmail;
     const user = await User.findOne({email: email});
     if (user === null) {
         throw new UserNotFoundException("User Not found");
@@ -56,7 +44,6 @@ const addCustomer = async (addCustomerRequest) => {
     if (customer !== null) {
         throw new CustomerAlreadyExistException("Customer already exist (You can update Customer description if necessary)");
     }
-
     const newCustomer = {
         name: user.valueOf().email + customerName,
         email: customerEmail,
@@ -64,64 +51,41 @@ const addCustomer = async (addCustomerRequest) => {
         description: customerDescription,
         defaultDeadline: date,
     };
-    console.log("i got here to return")
-
-
     const savedCustomer = await Customer.create(newCustomer);
-    console.log("i got here to create")
-
     savedCustomer.valueOf().userId = user.valueOf()._id;
     await savedCustomer.save();
-
     await user.save();
-    console.log("i got here to return return")
-
     return {
         message: "New customer add successfully"
-
     };
 };
 
 
-const update = async (updateCustomerRequest) => {
-    const {userEmail, customerName, customerEmail, customerPhoneNumber, customerDescription} = updateCustomerRequest
-
-};
 const getCustomer = async (findCustomerRequest) => {
     const {userEmail, customerName} = findCustomerRequest;
-
     const user = await findUser(userEmail);
-
     const customer = await Customer.findOne({name: user.valueOf().email + customerName});
-
     if (customer === null) {
         throw new CustomerAlreadyExistException("Customer not found");
     }
-
     return {
         name: customer.valueOf().name.slice(user.valueOf().email.length),
-        email: customer.valueOf().email,
-        phoneNumber: customer.valueOf().phoneNumber,
+        email: customer.valueOf().email, phoneNumber: customer.valueOf().phoneNumber,
         description: customer.valueOf().description,
     };
 
 
 };
 
-const getAllCustomers = async (getAllCustomersRequest) => {
-    const {userEmail} = getAllCustomersRequest;
+
+const getAllCustomers = async (userEmail) => {
     const user = await findUser(userEmail);
-
     let customers = await Customer.find({userId: user.valueOf()._id});
-
     if (customers.length === 0) {
         throw new NoCustomerException("No Customer Available");
     }
-
     let slicedNames = []
-
     slicedNames = customers.map(customer => customer.name.slice(user.email.length));
-
     for (let customer in customers) {
         customers[customer].name = slicedNames[customer]
         delete customers[customer].userId;
@@ -130,16 +94,13 @@ const getAllCustomers = async (getAllCustomersRequest) => {
 
 };
 
+
 const deleteCustomer = async (deleteCustomerRequest) => {
 
     const {userEmail, customerName} = deleteCustomerRequest;
-
     const user = await findUser(userEmail);
-
     const customer = await getCustomer(deleteCustomerRequest);
-
     await Customer.deleteOne({name: user.valueOf().email + customer.valueOf().name});
-
     return {
         message: "DONE"
     }
@@ -149,35 +110,54 @@ const deleteCustomer = async (deleteCustomerRequest) => {
 const deleteAllCustomers = async (deleteAllCustomersRequest) => {
 
     const {userEmail} = deleteAllCustomersRequest
-
     const user = await findUser(userEmail)
-
     let userId = user.valueOf()._id
-
     await Customer.deleteMany({userId: userId});
-
     return {
         message: "DONE"
     }
 
 };
 
+const deleteAccount = async (userEmail)=>{
+    const user = await findUser(userEmail)
+    User.deleteOne({email:userEmail})
+    return {
+        message: "DONE"
+    }
+}
+
+const dailyReminderChecker = schedule.scheduleJob('*/1 * * * *', async () => {
+    let currentUserEmail;
+    let customers = []
+    let todayDeadline = []
+    let users = await User.find({})
+    for (let user of users) {
+        currentUserEmail = user.valueOf().email;
+        let userDefaultReminder = user.numberOfDaysToDeadline
+        customers = getAllCustomers(currentUserEmail)
+        for (let customer in customers) {
+            if (await customerDeadline(customer,userDefaultReminder)) {
+                todayDeadline.push(customer)
+            }
+        }
+        await reminderUser(currentUserEmail, todayDeadline);
+    }
+})
+
 
 const findUser = async (email) => {
-
     const user = await User.findOne({email: email})
-
     if (user === null) {
         throw new UserNotFoundException("User doesnt exist")
     }
     return user
 
 };
-const setDeadLine = async (deadlineYear, deadlineMonth, deadlineDay) => {
-    const date = new Date()
+const setDeadLineDate = async (deadlineYear, deadlineMonth, deadlineDay) => {
+    const date = new Date(deadlineYear,deadlineMonth,deadlineDay)
     date.setFullYear(deadlineYear, deadlineMonth - 1, deadlineDay)
     if (moment(date).isBefore(Date.now())) throw new InvalidDateException("Inputted Date is Invalid")
-    console.log(setReminderDate(date,1))
     return date
 };
 
@@ -187,21 +167,7 @@ const setReminderDate = async (deadlineDate, userDefaultDeadlineReminder) => {
     return currentDate
 };
 
-const dailyReminderChecker = schedule.scheduleJob('0 0 * * *', async () => {
-    const currentDate = new Date();
-    let customers = []
-    let todayDeadLine = []
-    let currentRunningUserEmail = "";
-    for await (let user of User.find()) {
-        customers = getAllCustomers(user.email)
-        currentRunningUserEmail = user.email;
-        for await (let customer of customers) {
-            if (await customerDeadline(customer,user.defaultDeadlineReminder))
-            todayDeadLine.push(customer)
-        }
-        await reminderUser(currentRunningUserEmail,todayDeadLine)
-    }
-});
+
 
 const customerDeadline = async (customer, userDefaultDeadlineReminder) => {
     const todayDate = new Date();
@@ -212,20 +178,19 @@ const customerDeadline = async (customer, userDefaultDeadlineReminder) => {
 }
 
 
-const updateUserInfo = async (userUpdateRequest) => {
 
 
-}
-// setReminderDate("2024-05-15",1)
+
 
 
 module.exports = {
     createUser,
     addCustomer,
-    update,
+    findUser,
     getCustomer,
     getAllCustomers,
     deleteCustomer,
     deleteAllCustomers,
-    setReminderDate
+    setReminderDate,
+    deleteAccount,
 }
