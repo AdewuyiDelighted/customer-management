@@ -44,12 +44,7 @@ const addCustomer = async (addCustomerRequest) => {
     if (customer !== null) {
         throw new CustomerAlreadyExistException("Customer already exist (You can update Customer description if necessary)");
     }
-    const newCustomer = {
-        name: user.valueOf().email + customerName,
-        email: customerEmail,
-        phoneNumber: customerPhoneNumber,
-        description: customerDescription,
-        defaultDeadline: date,
+    const newCustomer = {name: user.valueOf().email + customerName, email: customerEmail, phoneNumber: customerPhoneNumber, description: customerDescription, defaultDeadline: date,
     };
     const savedCustomer = await Customer.create(newCustomer);
     savedCustomer.valueOf().userId = user.valueOf()._id;
@@ -183,12 +178,7 @@ const customerDeadline = async (customer, userDefaultDeadlineReminder) => {
 
 
 
-module.exports = {
-    createUser,
-    addCustomer,
-    findUser,
-    getCustomer,
-    getAllCustomers,
+module.exports = {createUser, addCustomer, findUser, getCustomer, getAllCustomers,
     deleteCustomer,
     deleteAllCustomers,
     setReminderDate,

@@ -11,7 +11,6 @@ ConnectDB(dburl)
 
 app.use(express.json())
 app.use('/api/user',router)
-// app.use(notFound)
 
 
 
