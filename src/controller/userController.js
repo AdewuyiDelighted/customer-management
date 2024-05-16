@@ -5,7 +5,7 @@ const register = async (request, response) => {
         const res = await userService.createUser(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const addCustomer = async (request, response) => {
@@ -13,7 +13,7 @@ const addCustomer = async (request, response) => {
         const res = await userService.addCustomer(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const updateCustomer = async (request, response) => {
@@ -21,7 +21,7 @@ const updateCustomer = async (request, response) => {
         const res = await userService.update(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const getACustomer = async (request, response) => {
@@ -29,7 +29,7 @@ const getACustomer = async (request, response) => {
         const res = await userService.getCustomer(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const getAllCustomers = async (request, response) => {
@@ -37,7 +37,7 @@ const getAllCustomers = async (request, response) => {
         const res = await userService.getAllCustomers(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const removeACustomer = async (request, response) => {
@@ -45,7 +45,7 @@ const removeACustomer = async (request, response) => {
         const res = await userService.deleteCustomer(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const removeAllCustomers = async (request, response) => {
@@ -53,7 +53,7 @@ const removeAllCustomers = async (request, response) => {
         const res = await userService.deleteAllCustomers(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 
@@ -62,7 +62,7 @@ const setReminder = async (request, response) => {
         const res = await userService.setReminderDate(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 const deleteAccount = async (request, response) => {
@@ -70,7 +70,7 @@ const deleteAccount = async (request, response) => {
         const res = await userService.deleteAccount(request.body);
         response.status(200).json({res})
     } catch (error) {
-        response.status(500).json(error.message)
+        response.status(400).json(error.message)
     }
 };
 

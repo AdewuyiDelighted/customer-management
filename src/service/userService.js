@@ -25,7 +25,7 @@ const createUser = async (request) => {
     };
     return {
         data: response,
-        message: "Registration Successfully"
+        message: "Registration Successful"
     };
 };
 
@@ -38,7 +38,7 @@ const addCustomer = async (addCustomerRequest) => {
     let email = addCustomerRequest.valueOf().userEmail;
     const user = await User.findOne({email: email});
     if (user === null) {
-        throw new UserNotFoundException("User Not found");
+        throw new UserNotFoundException("User doesn't exist ");
     }
     const customer = await Customer.findOne({name: user.valueOf().email + customerName});
     if (customer !== null) {
@@ -61,7 +61,7 @@ const getCustomer = async (findCustomerRequest) => {
     const user = await findUser(userEmail);
     const customer = await Customer.findOne({name: user.valueOf().email + customerName});
     if (customer === null) {
-        throw new CustomerAlreadyExistException("Customer not found");
+        throw new CustomerAlreadyExistException("Customer doesn't exist");
     }
     return {
         name: customer.valueOf().name.slice(user.valueOf().email.length),
@@ -97,7 +97,7 @@ const deleteCustomer = async (deleteCustomerRequest) => {
     const customer = await getCustomer(deleteCustomerRequest);
     await Customer.deleteOne({name: user.valueOf().email + customer.valueOf().name});
     return {
-        message: "DONE"
+        message: "Customer detail deleted successfully"
     }
 };
 
@@ -109,7 +109,7 @@ const deleteAllCustomers = async (deleteAllCustomersRequest) => {
     let userId = user.valueOf()._id
     await Customer.deleteMany({userId: userId});
     return {
-        message: "DONE"
+        message: "All customers details deleted successfully"
     }
 
 };
@@ -118,7 +118,7 @@ const deleteAccount = async (userEmail)=>{
     const user = await findUser(userEmail)
     User.deleteOne({email:userEmail})
     return {
-        message: "DONE"
+        message: "Account deleted successfully"
     }
 }
 
